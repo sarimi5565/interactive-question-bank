@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Interactive Question Bank</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%23ff6b6b'/%3E%3Ctext x='32' y='40' text-anchor='middle' font-family='Arial' font-size='28' fill='white'%3EQ%3C/text%3E%3C/svg%3E">
+  <!-- MathJax v3 -->
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\(', '\)']], displayMath: [['$$','$$'], ['\[','\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <header class="hero">
+    <h1>📚 Interactive Question Bank</h1>
+    <p class="subtitle">Search, filter, and reveal solutions with text 📝, images 🖼️, and videos 🎥</p>
+    <div class="toolbar">
+      <div class="field">
+        <label for="search">Search</label>
+        <input id="search" type="search" placeholder="Keywords, tags, topic, subtopic..."/>
+      </div>
+      <div class="field">
+        <label for="topic">Topic</label>
+        <select id="topic">
+          <option value="">All</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="subtopic">Subtopic</label>
+        <select id="subtopic">
+          <option value="">All</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="difficulty">Difficulty</label>
+        <select id="difficulty">
+          <option value="">All</option>
+          <option>Easy</option>
+          <option>Medium</option>
+          <option>Hard</option>
+        </select>
+      </div>
+      <div class="btns">
+        <button id="clear">🧹 Clear</button>
+        <button id="random">🎲 Random</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section id="grid" class="grid" aria-live="polite"></section>
+    <div id="empty" class="empty" hidden>No questions match your filters.</div>
+
+    <nav class="pagination" aria-label="Pagination">
+      <button id="prev" disabled>Prev</button>
+      <span id="pageInfo">Page 1</span>
+      <button id="next" disabled>Next</button>
+    </nav>
+  </main>
+
+  <footer class="footer">
+    <div>Made with ❤️ for learning. Hosted on GitHub Pages.</div>
+    <div><a target="_blank" href="https://github.com/sarimi5565/interactive-question-bank">Source on GitHub</a></div>
+  </footer>
+
+  <script>
+    window.IQB_SHEET_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSmH8dnXMAAwO35j4g0o8mWHnatyeC5CSQ08fwuhJFzU-hXsYBQ3pRAp1hGgdpNLWlKHo2qlATIuU1H/pub?output=csv";
+  </script>
+  <script src="script.js"></script>
+</body>
+</html>

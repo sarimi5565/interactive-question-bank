@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Interactive Question Bank - Debug</title>
+  <style>
+    :root {
+      --primary: #ff6b6b;
+      --secondary: #4ecdc4;
+      --bg: #f8f9fa;
+      --card: #ffffff;
+      --border: #e9ecef;
+      --text: #2d3436;
+      --text-muted: #636e72;
+      --shadow: 0 2px 12px rgba(0,0,0,0.08);
+    }
+
+    * { box-sizing: border-box; }
+    body { 
+      margin: 0; 
+      font-family: system-ui, -apple-system, sans-serif; 
+      background: var(--bg); 
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      padding: 2rem 1rem;
+      text-align: center;
+    }
+
+    .hero h1 { margin: 0 0 0.5rem 0; font-size: 2.5rem; }
+    .subtitle { margin: 0 0 2rem 0; opacity: 0.9; font-size: 1.1rem; }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: center;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      min-width: 140px;
+    }
+
+    .field label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      opacity: 0.9;
+    }
+
+    .field input, .field select {
+      padding: 0.5rem;
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 0.5rem;
+      background: rgba(255,255,255,0.1);
+      color: white;
+      font-size: 0.9rem;
+    }
+
+    .field input::placeholder { color: rgba(255,255,255,0.7); }
+    .field option { background: var(--text); color: white; }
+
+    .btns {
+      display: flex;
+      gap: 0.5rem;
+      align-items: end;
+    }
+
+    button {
+      padding: 0.5rem 1rem;
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 0.5rem;
+      background: rgba(255,255,255,0.1);
+      color: white;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+
+    button:hover:not(:disabled) {
+      background: rgba(255,255,255,0.2);
+      transform: translateY(-1px);
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    main {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+    }
+
+    .meta {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+    }
+
+    .title {
+      font-weight: 600;
+      font-size: 1.05rem;
+      margin-bottom: 1rem;
+      line-height: 1.4;
+    }
+
+    .thumb {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+      line-height: 1.4;
+    }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .tag {
+      background: var(--primary);
+      color: white;
+      padding: 0.2rem 0.5rem;
+      border-radius: 0.25rem;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .tag:hover { opacity: 0.8; }
+
+    .bullets {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      font-size: 1.2rem;
+    }
+
+    .actions {
+      margin-bottom: 1rem;
+    }
+
+    .small {
+      padding: 0.4rem 0.8rem;
+      font-size: 0.8rem;
+      background: var(--secondary);
+      border: none;
+      color: white;
+    }
+
+    .solution {
+      display: none;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .solution.open { display: block; }
+
+    .solution img, .solution iframe {
+      max-width: 100%;
+      height: auto;
+      border-radius: 0.5rem;
+      margin: 0.5rem 0;
+    }
+
+    .solution iframe {
+      aspect-ratio: 16/9;
+      width: 100%;
+      border: none;
+    }
+
+    .empty {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      padding: 3rem 1rem;
+    }
+
+    .pagination {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1rem;
+      padding: 2rem 0;
+    }
+
+    .footer {
+      background: var(--card);
+      border-top: 1px solid var(--border);
+      padding: 2rem 1rem;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .footer a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    .debug {
+      background: #fff3cd;
+      border: 1px solid #ffeaa7;
+      border-radius: 0.5rem;
+      padding: 1rem;
+      margin: 1rem 0;
+      font-family: monospace;
+      font-size: 0.9rem;
+      white-space: pre-wrap;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    @media (max-width: 768px) {
+      .hero h1 { font-size: 2rem; }
+      .toolbar { flex-direction: column; align-items: center; }
+      .field { min-width: 200px; }
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$','$$'], ['\\[','\\]']] },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+</head>
+<body>
+  <header class="hero">
+    <h1>📚 Interactive Question Bank - Debug Mode</h1>
+    <p class="subtitle">Debug version with console logging</p>
+    <div class="toolbar">
+      <div class="field">
+        <label for="search">Search</label>
+        <input id="search" type="search" placeholder="Keywords, tags, topic, subtopic..."/>
+      </div>
+      <div class="field">
+        <label for="topic">Topic</label>
+        <select id="topic">
+          <option value="">All</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="subtopic">Subtopic</label>
+        <select id="subtopic">
+          <option value="">All</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="difficulty">Difficulty</label>
+        <select id="difficulty">
+          <option value="">All</option>
+          <option>Easy</option>
+          <option>Medium</option>
+          <option>Hard</option>
+        </select>
+      </div>
+      <div class="btns">
+        <button id="clear">🧹 Clear</button>
+        <button id="random">🎲 Random</button>
+        <button id="debug-btn">Show Debug Info</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div id="debug-info" class="debug" style="display: none;">
+      Debug information will appear here...
+    </div>
+    
+    <section id="grid" class="grid" aria-live="polite"></section>
+    <div id="empty" class="empty" hidden>No questions match your filters.</div>
+
+    <nav class="pagination" aria-label="Pagination">
+      <button id="prev" disabled>Prev</button>
+      <span id="pageInfo">Page 1</span>
+      <button id="next" disabled>Next</button>
+    </nav>
+  </main>
+
+  <footer class="footer">
+    <div>Debug version - Check console for detailed logs</div>
+  </footer>
+
+  <script>
+    // Enhanced debug version
+    (() => {
+      const SHEET_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSmH8dnXMAAwO35j4g0o8mWHnatyeC5CSQ08fwuhJFzU-hXsYBQ3pRAp1hGgdpNLWlKHo2qlATIuU1H/pub?output=csv";
+      const PAGE_SIZE = 12;
+
+      const state = {
+        all: [],
+        filtered: [],
+        page: 1,
+        query: '',
+        topic: '',
+        subtopic: '',
+        difficulty: '',
+      };
+
+      const el = {
+        grid: document.getElementById('grid'),
+        empty: document.getElementById('empty'),
+        search: document.getElementById('search'),
+        topic: document.getElementById('topic'),
+        subtopic: document.getElementById('subtopic'),
+        difficulty: document.getElementById('difficulty'),
+        clear: document.getElementById('clear'),
+        random: document.getElementById('random'),
+        prev: document.getElementById('prev'),
+        next: document.getElementById('next'),
+        pageInfo: document.getElementById('pageInfo'),
+        debugInfo: document.getElementById('debug-info'),
+        debugBtn: document.getElementById('debug-btn'),
+      };
+
+      function log(message, data = null) {
+        console.log(`[IQB Debug] ${message}`, data || '');
+        const debugDiv = el.debugInfo;
+        const timestamp = new Date().toLocaleTimeString();
+        debugDiv.textContent += `[${timestamp}] ${message}\n`;
+        if (data) {
+          debugDiv.textContent += `  Data: ${JSON.stringify(data, null, 2)}\n`;
+        }
+        debugDiv.scrollTop = debugDiv.scrollHeight;
+      }
+
+      el.debugBtn.addEventListener('click', () => {
+        const isVisible = el.debugInfo.style.display !== 'none';
+        el.debugInfo.style.display = isVisible ? 'none' : 'block';
+        el.debugBtn.textContent = isVisible ? 'Show Debug Info' : 'Hide Debug Info';
+      });
+
+      const debounce = (fn, ms) => { let t; return (...a) => { clearTimeout(t); t=setTimeout(() => fn(...a), ms); }; };
+
+      function parseCSV(text) {
+        log("Starting CSV parsing");
+        const rows = [];
+        let cur = [], field = '', inQuotes = false;
+        for (let i=0;i<text.length;i++) {
+          const c = text[i], n = text[i+1];
+          if (c === '"') {
+            if (inQuotes && n === '"') { field += '"'; i++; }
+            else inQuotes = !inQuotes;
+          } else if (c === ',' && !inQuotes) {
+            cur.push(field); field = '';
+          } else if ((c === '\n' || c === '\r') && !inQuotes) {
+            if (field !== '' || cur.length) { cur.push(field); rows.push(cur); cur=[]; field=''; }
+          } else field += c;
+        }
+        if (field !== '' || cur.length) { cur.push(field); rows.push(cur); }
+        log(`CSV parsed into ${rows.length} rows`);
+        return rows;
+      }
+
+      function toObjects(rows) {
+        log("Converting CSV rows to objects");
+        if (rows.length === 0) {
+          log("No rows to convert!");
+          return [];
+        }
+        
+        const headers = rows.shift().map(h => h.trim());
+        log("Headers found", headers);
+        
+        const objects = rows.filter(r => r.some(x => (x||'').trim() !== '')).map((r, index) => {
+          const o = {};
+          headers.forEach((h,i) => o[h] = (r[i]||'').trim());
+          
+          // Handle tags
+          const tags = o.tags || o.tag || '';
+          o.tags = tags ? tags.split(',').map(s => s.trim()).filter(Boolean) : [];
+          
+          // Handle images
+          const qi = o.question_images || o.question_image || '';
+          o.question_images = qi ? qi.split(',').map(s => s.trim()).filter(Boolean) : [];
+          const si = o.solution_images || o.solution_image || '';
+          o.solution_images = si ? si.split(',').map(s => s.trim()).filter(Boolean) : [];
+          
+          // Handle video
+          o.video_url = o.video_url || o.solution_video_url || '';
+          o.difficulty = o.difficulty || '';
+          
+          if (index < 3) { // Log first 3 objects for debugging
+            log(`Object ${index + 1}`, o);
+          }
+          
+          return o;
+        });
+        
+        log(`Converted ${objects.length} valid objects`);
+        return objects;
+      }
+
+      async function loadData() {
+        log("Starting data load");
+        log("CSV URL", SHEET_CSV);
+        
+        try {
+          const res = await fetch(SHEET_CSV, { 
+            cache: 'no-store',
+            headers: {
+              'Accept': 'text/csv,text/plain,*/*'
+            }
+          });
+          
+          log(`Fetch response status: ${res.status}`);
+          log(`Fetch response headers`, Object.fromEntries(res.headers.entries()));
+          
+          if (!res.ok) {
+            throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+          }
+          
+          const text = await res.text();
+          log(`Received CSV text (first 500 chars)`, text.substring(0, 500));
+          
+          if (!text.trim()) {
+            throw new Error('Received empty CSV data');
+          }
+          
+          const rows = parseCSV(text);
+          const objects = toObjects(rows);
+          
+          log(`Final data loaded: ${objects.length} questions`);
+          return objects;
+          
+        } catch (error) {
+          log("Error loading data", error.message);
+          throw error;
+        }
+      }
+
+      function buildTopicSubtopicOptions() {
+        log("Building topic/subtopic options");
+        const topics = Array.from(new Set(state.all.map(q => q.topic).filter(Boolean))).sort();
+        log("Topics found", topics);
+        el.topic.innerHTML = '<option value="">All</option>' + topics.map(t => `<option>${t}</option>`).join('');
+        updateSubtopics();
+      }
+
+      function updateSubtopics() {
+        const chosen = state.topic;
+        const subs = Array.from(new Set(state.all
+          .filter(q => !chosen || q.topic === chosen)
+          .map(q => q.subtopic).filter(Boolean))).sort();
+        log("Subtopics found", subs);
+        el.subtopic.innerHTML = '<option value="">All</option>' + subs.map(s => `<option>${s}</option>`).join('');
+      }
+
+      function applyFilters() {
+        log("Applying filters", {
+          query: state.query,
+          topic: state.topic,
+          subtopic: state.subtopic,
+          difficulty: state.difficulty
+        });
+        
+        const q = state.query.toLowerCase();
+        state.filtered = state.all.filter(item => {
+          const matchesQuery = !q || [
+            item.id, item.question_text, item.solution_text, item.topic, item.subtopic, item.difficulty, (item.tags||[]).join(' ')
+          ].join(' ').toLowerCase().includes(q);
+          const matchesTopic = !state.topic || item.topic === state.topic;
+          const matchesSub = !state.subtopic || item.subtopic === state.subtopic;
+          const matchesDiff = !state.difficulty || (item.difficulty||'') === state.difficulty;
+          return matchesQuery && matchesTopic && matchesSub && matchesDiff;
+        });
+        
+        log(`Filtered to ${state.filtered.length} questions`);
+        state.page = 1;
+        render();
+      }
+
+      function escapeHTML(s='') {
+        return s.replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+      }
+
+      function cardHTML(item) {
+        const hasText = !!(item.solution_text && item.solution_text.trim());
+        const hasImgs = (item.solution_images||[]).length>0;
+        const hasVideo = !!(item.video_url && item.video_url.trim());
+        const thumb = (item.question_images && item.question_images[0])
+          ? `<img alt="Question image" src="${item.question_images[0]}" style="max-width:100%;border-radius:.5rem;border:1px solid var(--border);"/>`
+          : `<div class="thumb">${escapeHTML((item.question_text||'').slice(0,160))}${(item.question_text||'').length>160?'…':''}</div>`;
+        const tags = (item.tags||[]).map(t => `<span class="tag" data-tag="${t}">#${t}</span>`).join(' ');
+
+        return `
+        <article class="card" data-id="${item.id}" aria-label="${item.topic||''} • ${item.subtopic||''}">
+          <div class="meta">
+            <span>${item.topic||'—'} • ${item.subtopic||'—'}</span>
+            <span>•</span>
+            <span>${item.difficulty||'—'}</span>
+          </div>
+          <div class="title">${item.question_text||''}</div>
+          ${thumb}
+          <div class="tags">${tags}</div>
+          <div class="bullets">
+            <span class="icon" title="Text">${hasText?'📝':''}</span>
+            <span class="icon" title="Images">${hasImgs?'🖼️':''}</span>
+            <span class="icon" title="Video">${hasVideo?'🎥':''}</span>
+          </div>
+          <div class="actions">
+            <button class="small toggle" aria-expanded="false">Show solution</button>
+          </div>
+          <div class="solution" aria-hidden="true"></div>
+        </article>`;
+      }
+
+      function toggleSolution(card, item) {
+        const panel = card.querySelector('.solution');
+        const btn = card.querySelector('.toggle');
+        const open = panel.classList.toggle('open');
+        btn.textContent = open ? 'Hide solution' : 'Show solution';
+        btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+        panel.setAttribute('aria-hidden', open ? 'false' : 'true');
+        if (open && !panel.dataset.loaded) {
+          panel.innerHTML = buildSolutionHTML(item);
+          panel.dataset.loaded = '1';
+          if (window.MathJax && window.MathJax.typeset) window.MathJax.typeset([panel]);
+        }
+      }
+
+      function buildSolutionHTML(item) {
+        const parts = [];
+        if (item.solution_text) parts.push(`<div class="solution-text">${item.solution_text}</div>`);
+        (item.solution_images||[]).forEach(src => parts.push(`<img alt="Solution image" src="${src}"/>`));
+        if (item.video_url) {
+          let id = item.video_url.trim();
+          const m = id.match(/[?&]v=([^&]+)/) || id.match(/youtu\\.be\\/([^?&]+)/) || id.match(/youtube\\.com\\/embed\\/([^?&]+)/);
+          if (m) id = m[1];
+          parts.push(`<iframe src="https://www.youtube.com/embed/${id}" title="Solution video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>`);
+        }
+        return parts.join('\\n');
+      }
+
+      // Event listeners
+      el.search.addEventListener('input', debounce(() => { state.query = el.search.value.trim(); applyFilters(); }, 200));
+      el.topic.addEventListener('change', () => { state.topic = el.topic.value; updateSubtopics(); applyFilters(); });
+      el.subtopic.addEventListener('change', () => { state.subtopic = el.subtopic.value; applyFilters(); });
+      el.difficulty.addEventListener('change', () => { state.difficulty = el.difficulty.value; applyFilters(); });
+      el.clear.addEventListener('click', () => {
+        state.query = ''; state.topic=''; state.subtopic=''; state.difficulty=''; 
+        el.search.value=''; el.topic.value=''; updateSubtopics(); el.difficulty.value=''; 
+        applyFilters();
+      });
+      el.random.addEventListener('click', () => {
+        if (!state.filtered.length) return;
+        const idx = Math.floor(Math.random()*state.filtered.length);
+        const id = state.filtered[idx].id;
+        const card = document.querySelector(`[data-id="${id}"]`);
+        if (card) {
+          card.scrollIntoView({ behavior:'smooth', block:'center' });
+          const btn = card.querySelector('.toggle');
+          const panel = card.querySelector('.solution');
+          if (panel && !panel.classList.contains('open')) btn.click();
+        }
+      });
+      el.prev.addEventListener('click', () => { if (state.page>1) { state.page--; render(); } });
+      el.next.addEventListener('click', () => {
+        const maxPage = Math.max(1, Math.ceil(state.filtered.length / PAGE_SIZE));
+        if (state.page < maxPage) { state.page++; render(); }
+      });
+
+      function render() {
+        log(`Rendering page ${state.page}`);
+        const start = (state.page-1)*PAGE_SIZE;
+        const items = state.filtered.slice(start, start+PAGE_SIZE);
+        log(`Rendering ${items.length} items`);
+        
+        el.grid.innerHTML = items.map(cardHTML).join('');
+        el.empty.hidden = state.filtered.length > 0;
+        const maxPage = Math.max(1, Math.ceil(state.filtered.length / PAGE_SIZE));
+        el.pageInfo.textContent = `Page ${state.page} of ${maxPage}`;
+        el.prev.disabled = state.page <= 1;
+        el.next.disabled = state.page >= maxPage;
+        
+        items.forEach(item => {
+          const card = document.querySelector(`[data-id="${item.id}"]`);
+          if (card) {
+            const btn = card.querySelector('.toggle');
+            btn.addEventListener('click', () => toggleSolution(card, item));
+            card.querySelectorAll('.tag').forEach(tagEl => tagEl.addEventListener('click', () => {
+              state.query = tagEl.dataset.tag;
+              el.search.value = state.query;
+              applyFilters();
+            }));
+          }
+        });
+      }
+
+      // Initialize
+      (async () => {
+        try {
+          log("Initializing application");
+          state.all = await loadData();
+          buildTopicSubtopicOptions();
+          applyFilters();
+          log("Initialization complete");
+        } catch (e) {
+          log("Initialization failed", e.message);
+          document.getElementById('grid').innerHTML = `<div class='empty'>Failed to load data: ${e.message}<br><br>Please check:<br>1. Google Sheets URL is accessible<br>2. Sheet is published to web<br>3. Network connection is working</div>`;
+        }
+      })();
+
+    })();
+  </script>
+</body>
+</html>
